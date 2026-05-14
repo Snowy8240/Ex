@@ -243,6 +243,20 @@
   .fg-inp[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.4) sepia(1) saturate(3) hue-rotate(10deg); cursor: pointer; }
   .form-actions { display: flex; gap: 0.7rem; margin-top: 1rem; }
 
+  /* MAIN TABS */
+  .main-tabs { display: flex; gap: 0.4rem; background: var(--bg-raised); border: 1px solid var(--blue-line); border-radius: 14px; padding: 0.35rem; }
+  .main-tab {
+    flex: 1; padding: 0.5rem 0.7rem; border-radius: 10px; border: none;
+    background: transparent; font-family: 'Outfit', sans-serif; font-size: 0.78rem;
+    font-weight: 600; color: var(--text-soft); cursor: pointer; transition: all 0.18s;
+    display: flex; align-items: center; justify-content: center; gap: 0.35rem;
+  }
+  .main-tab:hover { color: var(--text-main); background: var(--bg-hover); }
+  .main-tab.active { background: #fff; color: var(--blue-glow); box-shadow: 0 2px 10px rgba(249,115,22,0.18); border: 1px solid rgba(249,115,22,0.25); }
+  .tab-badge { background: var(--blue-vivid); color: #fff; border-radius: 20px; font-size: 0.6rem; padding: 0.08rem 0.38rem; font-weight: 700; }
+  .tab-panel { display: none; flex-direction: column; gap: 1.2rem; }
+  .tab-panel.active { display: flex; }
+
   /* ENTRIES */
   .entries-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
   .filter-bar { display: flex; gap: 0.3rem; flex-wrap: wrap; }
@@ -510,7 +524,14 @@
   <!-- MAIN -->
   <div class="main">
 
-    <!-- DATE BANNER -->
+    <!-- TAB NAV -->
+    <div class="main-tabs" id="mainTabs">
+      <button class="main-tab active" onclick="switchMainTab('add',this)">➕ Add Expense</button>
+      <button class="main-tab" onclick="switchMainTab('entries',this)">📋 Entries <span class="tab-badge" id="entriesCount">0</span></button>
+      <button class="main-tab" onclick="switchMainTab('yearly',this)">📅 Yearly</button>
+    </div>
+
+    <!-- DATE BANNER (always visible) -->
     <div class="date-banner">
       <div class="db-left">
         <div class="db-big" id="dbBig">Select a date</div>
@@ -521,6 +542,9 @@
         <div class="db-total" id="dayTotal">₹0</div>
       </div>
     </div>
+
+    <!-- TAB: ADD EXPENSE -->
+    <div class="tab-panel active" id="panel-add">
 
     <!-- FOOD PRICE CALCULATOR -->
     <div class="card food-calc-card">
@@ -581,6 +605,10 @@
       </div>
     </div>
 
+    </div><!-- end panel-add -->
+
+    <!-- TAB: ENTRIES -->
+    <div class="tab-panel" id="panel-entries">
     <!-- ENTRIES -->
     <div class="card">
       <div class="entries-hdr">
@@ -597,7 +625,10 @@
       </div>
       <div class="entry-list" id="entryList"></div>
     </div>
+    </div><!-- end panel-entries -->
 
+    <!-- TAB: YEARLY -->
+    <div class="tab-panel" id="panel-yearly">
     <!-- YEARLY OVERVIEW -->
     <div class="card yearly-card">
       <div class="card-title"><span class="ct-bar" style="background:linear-gradient(90deg,var(--cyan),var(--blue-vivid))"></span>📅 Yearly Overview — <span id="yearlyYearLbl" style="color:var(--cyan);margin-left:0.2rem"></span></div>
@@ -617,6 +648,7 @@
         </div>
       </div>
     </div>
+    </div><!-- end panel-yearly -->
 
   </div>
 </div>
@@ -765,6 +797,14 @@ function renderBanner() {
 // ── FILTER ──
 function setFilter(f,el) { S.filter=f; document.querySelectorAll('.fchip').forEach(c=>c.classList.remove('active')); el.classList.add('active'); renderEntries(); }
 
+// ── MAIN TAB SWITCHER ──
+function switchMainTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.main-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
 // ── ENTRIES ──
 function renderEntries() {
   const list=document.getElementById('entryList'), title=document.getElementById('entriesTitle');
@@ -776,6 +816,9 @@ function renderEntries() {
     title.textContent=d.toLocaleDateString('en-IN',{day:'numeric',month:'short'})+' — Entries';
   } else { title.textContent='All Entries'; }
   if(S.filter!=='all') items=items.filter(e=>e.cat===S.filter);
+  // Update badge
+  const badge=document.getElementById('entriesCount');
+  if(badge) badge.textContent=items.length;
   if(!items.length){ list.innerHTML='<div class="no-entries"><span class="ni">📋</span>No expenses here yet.<br>Add one above ↑</div>'; return; }
   items.forEach(e=>{
     const cat=CATS[e.cat]||CATS.other;
