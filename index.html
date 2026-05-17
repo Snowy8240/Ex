@@ -1265,7 +1265,12 @@ function startClock() {
     if (s === lastSec) return; // skip if second hasn't changed
     lastSec = s;
     const h = p2(now.getHours()), m = p2(now.getMinutes());
-    if (clockEl) clockEl.textContent = `${h}:${m}:${p2(s)}`;
+  if (clockEl) {
+    const hrs24 = now.getHours();
+    const ampm  = hrs24 >= 12 ? 'PM' : 'AM';
+    const hrs12 = hrs24 % 12 || 12;
+    clockEl.textContent = `${p2(hrs12)}:${p2(now.getMinutes())}:${p2(s)} ${ampm}`;
+  }
     if (dateEl && s === 0) { // only update date display once per minute
       dateEl.textContent = now.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
     }
