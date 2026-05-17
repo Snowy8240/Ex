@@ -345,6 +345,14 @@
   .entry-amt { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 600; flex-shrink: 0; }
   .entry-del { background: none; border: none; cursor: pointer; color: var(--text-soft); font-size: 0.82rem; padding: 0.22rem 0.32rem; border-radius: 5px; transition: all 0.14s; flex-shrink: 0; }
   .entry-del:hover { color: var(--red); background: var(--red-dim); }
+  .entry-more-btn {
+    display: inline-block; margin-left: 0.3rem;
+    color: var(--blue-vivid); font-size: 0.72rem; font-weight: 700;
+    cursor: pointer; border-radius: 4px; padding: 0.05rem 0.3rem;
+    background: rgba(249,115,22,0.1); border: 1px solid rgba(249,115,22,0.25);
+    transition: all 0.15s; white-space: nowrap; vertical-align: middle;
+  }
+  .entry-more-btn:hover { background: rgba(249,115,22,0.22); border-color: var(--blue-vivid); }
 
   .no-entries { text-align: center; padding: 2.5rem 1rem; color: var(--text-soft); font-size: 0.88rem; border: 1px dashed var(--blue-line); border-radius: 12px; line-height: 1.8; }
   .no-entries .ni { font-size: 2rem; display: block; margin-bottom: 0.4rem; opacity: 0.4; }
@@ -922,9 +930,53 @@ function renderEntries() {
   items.forEach(e=>{
     const cat=CATS[e.cat]||CATS.other;
     const el=document.createElement('div'); el.className='entry-item';
-    el.innerHTML=`<div class="entry-badge" style="background:${cat.bg};border-color:${cat.border};">${cat.icon}</div><div class="entry-info"><div class="entry-name">${esc(e.desc)||cat.label}</div><div class="entry-meta">${cat.label}${e.note?' · '+esc(e.note):''} · ${sfd(e.date)}</div></div><div class="entry-amt" style="color:${cat.color};">${fmt(e.amount)}</div><button class="entry-del" onclick="delEntry('${e.id}')" title="Delete">✕</button>`;
+
+    // Parse desc — food calc entries may have many comma-separated items
+    const allParts = e.desc ? e.desc.split(', ') : [];
+    // Strip the old hardcoded ' +more' suffix if present
+    const cleanParts = allParts.map(p => p.replace(/ \+more$/, '').trim()).filter(Boolean);
+    const PREVIEW = 3;
+    const hasMore = cleanParts.length > PREVIEW;
+    const previewText = cleanParts.slice(0, PREVIEW).join(', ');
+    const fullText    = cleanParts.join(', ');
+
+    const nameId = 'ename_' + e.id;
+    const btnId  = 'emoreBtn_' + e.id;
+
+    let nameHtml;
+    if (hasMore) {
+      nameHtml = `<div class="entry-name" id="${nameId}">${esc(previewText)}<span class="entry-more-btn" id="${btnId}" onclick="toggleEntryMore('${e.id}','${esc(fullText).replace(/'/g,"\\'")}','${esc(previewText).replace(/'/g,"\\'")}')"> +${cleanParts.length - PREVIEW} more ▾</span></div>`;
+    } else {
+      nameHtml = `<div class="entry-name">${esc(e.desc)||cat.label}</div>`;
+    }
+
+    el.innerHTML = `
+      <div class="entry-badge" style="background:${cat.bg};border-color:${cat.border};">${cat.icon}</div>
+      <div class="entry-info">
+        ${nameHtml}
+        <div class="entry-meta">${cat.label}${e.note?' · '+esc(e.note):''} · ${sfd(e.date)}</div>
+      </div>
+      <div class="entry-amt" style="color:${cat.color};">${fmt(e.amount)}</div>
+      <button class="entry-del" onclick="delEntry('${e.id}')" title="Delete">✕</button>
+    `;
     list.appendChild(el);
   });
+}
+
+function toggleEntryMore(id, fullText, previewText) {
+  const nameEl = document.getElementById('ename_' + id);
+  const btnEl  = document.getElementById('emoreBtn_' + id);
+  if (!nameEl || !btnEl) return;
+  const expanded = btnEl.dataset.expanded === '1';
+  if (expanded) {
+    // Collapse
+    nameEl.innerHTML = previewText + `<span class="entry-more-btn" id="emoreBtn_${id}" onclick="toggleEntryMore('${id}','${fullText.replace(/'/g,"\\'")}','${previewText.replace(/'/g,"\\'")}')"> +more ▾</span>`;
+    document.getElementById('emoreBtn_' + id).dataset.expanded = '0';
+  } else {
+    // Expand
+    nameEl.innerHTML = fullText + `<span class="entry-more-btn" id="emoreBtn_${id}" onclick="toggleEntryMore('${id}','${fullText.replace(/'/g,"\\'")}','${previewText.replace(/'/g,"\\'")}')"> ▴ less</span>`;
+    document.getElementById('emoreBtn_' + id).dataset.expanded = '1';
+  }
 }
 function sfd(ds){ const d=new Date(ds+'T00:00:00'); return d.toLocaleDateString('en-IN',{day:'numeric',month:'short'}); }
 function delEntry(id){ S.expenses=S.expenses.filter(e=>e.id!==id); save(); renderAll(); toast('Entry deleted','err'); }
@@ -1062,7 +1114,7 @@ function addFoodCalcToExpense() {
     const e = {
       id: Date.now().toString(36)+Math.random().toString(36).slice(2,5),
       cat,
-      desc: g.items.slice(0,3).join(', ') + (g.items.length>3?' +more':''),
+      desc: g.items.join(', '),
       amount: +g.total.toFixed(2),
       date: S.selectedDate,
       note: '🛒 Food Calculator',
