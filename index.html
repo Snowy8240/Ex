@@ -243,19 +243,80 @@
   .fg-inp[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.4) sepia(1) saturate(3) hue-rotate(10deg); cursor: pointer; }
   .form-actions { display: flex; gap: 0.7rem; margin-top: 1rem; }
 
-  /* MAIN TABS */
-  .main-tabs { display: flex; gap: 0.4rem; background: var(--bg-raised); border: 1px solid var(--blue-line); border-radius: 14px; padding: 0.35rem; }
-  .main-tab {
-    flex: 1; padding: 0.5rem 0.7rem; border-radius: 10px; border: none;
-    background: transparent; font-family: 'Outfit', sans-serif; font-size: 0.78rem;
-    font-weight: 600; color: var(--text-soft); cursor: pointer; transition: all 0.18s;
-    display: flex; align-items: center; justify-content: center; gap: 0.35rem;
+  /* MAIN TABS — redesigned */
+  .main-tabs {
+    display: flex; gap: 0; background: var(--bg-raised);
+    border: 1px solid var(--blue-line); border-radius: 16px; padding: 5px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
   }
-  .main-tab:hover { color: var(--text-main); background: var(--bg-hover); }
-  .main-tab.active { background: #fff; color: var(--blue-glow); box-shadow: 0 2px 10px rgba(249,115,22,0.18); border: 1px solid rgba(249,115,22,0.25); }
-  .tab-badge { background: var(--blue-vivid); color: #fff; border-radius: 20px; font-size: 0.6rem; padding: 0.08rem 0.38rem; font-weight: 700; }
+  .main-tab {
+    flex: 1; padding: 0.55rem 0.5rem; border-radius: 12px; border: none;
+    background: transparent; font-family: 'Outfit', sans-serif; font-size: 0.76rem;
+    font-weight: 600; color: var(--text-soft); cursor: pointer;
+    transition: all 0.22s cubic-bezier(0.4,0,0.2,1);
+    display: flex; align-items: center; justify-content: center; gap: 0.3rem;
+    position: relative; white-space: nowrap;
+  }
+  .main-tab:hover:not(.active) { color: var(--blue-glow); background: rgba(249,115,22,0.07); }
+  .main-tab.active {
+    background: linear-gradient(135deg, var(--blue-vivid), #ea580c);
+    color: #fff;
+    box-shadow: 0 3px 14px rgba(249,115,22,0.38);
+    transform: translateY(-1px);
+  }
+  .main-tab.active .tab-badge { background: rgba(255,255,255,0.3); color: #fff; }
+  .tab-badge {
+    background: var(--blue-vivid); color: #fff; border-radius: 20px;
+    font-size: 0.58rem; padding: 0.08rem 0.4rem; font-weight: 700;
+    min-width: 18px; text-align: center; transition: all 0.2s;
+  }
   .tab-panel { display: none; flex-direction: column; gap: 1.2rem; }
-  .tab-panel.active { display: flex; }
+  .tab-panel.active { display: flex; animation: fadeIn 0.2s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+
+  /* CLOCK */
+  .db-center { text-align: center; position: relative; }
+  .db-clock {
+    font-family: 'Space Grotesk', sans-serif; font-size: 2rem; font-weight: 700;
+    color: var(--blue-glow); letter-spacing: 0.04em; line-height: 1;
+    text-shadow: 0 0 20px rgba(249,115,22,0.2);
+  }
+  .db-clock-date { font-size: 0.62rem; color: var(--text-soft); margin-top: 0.25rem; text-transform: uppercase; letter-spacing: 0.09em; }
+
+  /* JOURNAL */
+  .journal-card { border-top: 2px solid #8b5cf6; }
+  .journal-date-row { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.8rem; flex-wrap: wrap; }
+  .journal-mood-row { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+  .mood-btn {
+    font-size: 1.3rem; background: var(--bg-raised); border: 2px solid var(--blue-line);
+    border-radius: 10px; width: 38px; height: 38px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s; flex-shrink: 0;
+  }
+  .mood-btn:hover { border-color: #8b5cf6; background: rgba(139,92,246,0.1); transform: scale(1.1); }
+  .mood-btn.active { border-color: #8b5cf6; background: rgba(139,92,246,0.18); box-shadow: 0 0 12px rgba(139,92,246,0.25); transform: scale(1.08); }
+  .journal-textarea {
+    width: 100%; background: var(--bg-raised); border: 1px solid var(--blue-line);
+    border-radius: 12px; padding: 0.85rem 1rem;
+    font-family: 'Outfit', sans-serif; font-size: 0.88rem; color: var(--text-main);
+    outline: none; resize: vertical; min-height: 120px; line-height: 1.6;
+    transition: border-color 0.2s, box-shadow 0.2s; margin-bottom: 0.8rem;
+  }
+  .journal-textarea:focus { border-color: #8b5cf6; box-shadow: 0 0 0 3px rgba(139,92,246,0.12); }
+  .journal-textarea::placeholder { color: var(--text-soft); }
+  .journal-actions { display: flex; gap: 0.6rem; }
+  .journal-entry-item {
+    padding: 0.9rem 1rem; background: var(--bg-raised); border-radius: 12px;
+    border: 1px solid var(--blue-line); margin-bottom: 0.55rem;
+    transition: all 0.14s; animation: sIn 0.2s ease;
+  }
+  .journal-entry-item:hover { border-color: rgba(139,92,246,0.4); background: rgba(139,92,246,0.03); }
+  .jei-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.45rem; }
+  .jei-date { font-size: 0.72rem; font-weight: 600; color: var(--blue-glow); }
+  .jei-mood { font-size: 1.2rem; }
+  .jei-del { background: none; border: none; cursor: pointer; color: var(--text-soft); font-size: 0.75rem; padding: 0.15rem 0.3rem; border-radius: 4px; transition: all 0.12s; }
+  .jei-del:hover { color: var(--red); background: var(--red-dim); }
+  .jei-text { font-size: 0.84rem; color: var(--text-mid); line-height: 1.65; white-space: pre-wrap; word-break: break-word; }
 
   /* ENTRIES */
   .entries-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
@@ -526,9 +587,10 @@
 
     <!-- TAB NAV -->
     <div class="main-tabs" id="mainTabs">
-      <button class="main-tab active" onclick="switchMainTab('add',this)">➕ Add Expense</button>
-      <button class="main-tab" onclick="switchMainTab('entries',this)">📋 Entries <span class="tab-badge" id="entriesCount">0</span></button>
-      <button class="main-tab" onclick="switchMainTab('yearly',this)">📅 Yearly</button>
+      <button class="main-tab active" data-tab="add" onclick="switchMainTab('add',this)">➕ Add Expense</button>
+      <button class="main-tab" data-tab="entries" onclick="switchMainTab('entries',this)">📋 Entries <span class="tab-badge" id="entriesCount">0</span></button>
+      <button class="main-tab" data-tab="yearly" onclick="switchMainTab('yearly',this)">📅 Yearly</button>
+      <button class="main-tab" data-tab="journal" onclick="switchMainTab('journal',this)">📓 Journal</button>
     </div>
 
     <!-- DATE BANNER (always visible) -->
@@ -536,6 +598,10 @@
       <div class="db-left">
         <div class="db-big" id="dbBig">Select a date</div>
         <div class="db-sub" id="dbSub">Click any calendar day to begin</div>
+      </div>
+      <div class="db-center">
+        <div class="db-clock" id="dbClock">00:00:00</div>
+        <div class="db-clock-date" id="dbClockDate"></div>
       </div>
       <div class="db-right">
         <div class="db-lbl">Day's Total</div>
@@ -650,6 +716,33 @@
     </div>
     </div><!-- end panel-yearly -->
 
+    <!-- TAB: JOURNAL -->
+    <div class="tab-panel" id="panel-journal">
+      <div class="card journal-card">
+        <div class="card-title"><span class="ct-bar" style="background:linear-gradient(90deg,#8b5cf6,#ec4899)"></span>📓 Daily Journal</div>
+        <div class="journal-date-row">
+          <input class="fg-inp" type="date" id="journalDate" style="flex:1"/>
+          <div class="journal-mood-row" id="journalMoodRow">
+            <button class="mood-btn" data-mood="😊" onclick="selMood('😊',this)" title="Happy">😊</button>
+            <button class="mood-btn" data-mood="😐" onclick="selMood('😐',this)" title="Neutral">😐</button>
+            <button class="mood-btn" data-mood="😞" onclick="selMood('😞',this)" title="Sad">😞</button>
+            <button class="mood-btn" data-mood="😤" onclick="selMood('😤',this)" title="Stressed">😤</button>
+            <button class="mood-btn" data-mood="🤒" onclick="selMood('🤒',this)" title="Sick">🤒</button>
+            <button class="mood-btn" data-mood="🎉" onclick="selMood('🎉',this)" title="Celebrating">🎉</button>
+          </div>
+        </div>
+        <textarea class="journal-textarea" id="journalText" placeholder="What happened today? How did you spend? Any thoughts, feelings, or notes…" rows="5"></textarea>
+        <div class="journal-actions">
+          <button class="btn btn-blue" onclick="saveJournalEntry()" style="flex:1">💾 Save Entry</button>
+          <button class="btn btn-ghost" onclick="clearJournalForm()">Clear</button>
+        </div>
+      </div>
+      <div class="card" id="journalListCard">
+        <div class="card-title"><span class="ct-bar" style="background:linear-gradient(90deg,#8b5cf6,#ec4899)"></span>Past Entries <span id="journalCount" style="font-size:0.72rem;color:var(--text-soft);font-weight:400;text-transform:none;letter-spacing:0"></span></div>
+        <div id="journalList"></div>
+      </div>
+    </div><!-- end panel-journal -->
+
   </div>
 </div>
 
@@ -668,7 +761,8 @@ let S = {
   calMonth: null,
   filter: 'all',
   cat: null,
-  foodItems: []         // food price calculator items
+  foodItems: [],        // food price calculator items
+  journalEntries: []    // journal entries
 };
 
 const CATS = {
@@ -694,6 +788,7 @@ function init() {
   if (S.income && !S.incomeMap) S.incomeMap = {};
   if (!S.incomeMap) S.incomeMap = {};
   if (!S.foodItems) S.foodItems = [];
+  if (!S.journalEntries) S.journalEntries = [];
 
   const now=new Date();
   if(!S.calYear)        S.calYear  = now.getFullYear();
@@ -705,10 +800,14 @@ function init() {
   ySel.addEventListener('change',()=>{ S.calYear=+ySel.value; renderAll(); save(); });
 
   document.getElementById('eDate').value = fd(now);
+  document.getElementById('journalDate').value = fd(now);
+
   document.addEventListener('keydown', e=>{
     if(e.key==='Enter' && ['eDesc','eAmt','eNote'].includes(e.target.id)) addExp();
     if(e.key==='Enter' && ['fpName','fpPrice'].includes(e.target.id)) addFoodItem();
   });
+
+  startClock();
   renderAll();
 }
 
@@ -721,7 +820,7 @@ function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').re
 function monthKey(y,m) { return `${y}-${p2(m+1)}`; }
 function currentMonthKey() { return monthKey(S.calYear, S.calMonth); }
 
-function renderAll() { renderCal(); renderIncome(); renderBanner(); renderEntries(); renderBk(); renderFoodCalc(); renderYearly(); }
+function renderAll() { renderCal(); renderIncome(); renderBanner(); renderEntries(); renderBk(); renderFoodCalc(); renderYearly(); renderJournal(); }
 
 // ── INCOME (per-month) ──
 function setIncome() {
@@ -966,14 +1065,17 @@ function addFoodCalcToExpense() {
       desc: g.items.slice(0,3).join(', ') + (g.items.length>3?' +more':''),
       amount: +g.total.toFixed(2),
       date: S.selectedDate,
-      note: 'From Food Calculator',
+      note: '🛒 Food Calculator',
       createdAt: Date.now()
     };
     S.expenses.push(e);
   });
   save(); renderAll();
-  toast(`🛒 ${fmt(total)} added to ${sfd(S.selectedDate)}`,'ok');
+  toast(`🛒 ${fmt(total)} added to expenses for ${sfd(S.selectedDate)}`,'ok');
   resetFoodQtys();
+  // Auto-switch to Entries tab so user can see the added items
+  const entriesBtn = document.querySelector('.main-tab[data-tab="entries"]');
+  if (entriesBtn) switchMainTab('entries', entriesBtn);
 }
 
 // ── YEARLY OVERVIEW ──
@@ -1032,6 +1134,85 @@ function toast(msg,type='ok'){
   const wrap=document.getElementById('toastWrap');
   const t=document.createElement('div'); t.className=`toast ${type}`; t.textContent=msg;
   wrap.appendChild(t); setTimeout(()=>t.remove(),3200);
+}
+
+// ── REAL-TIME CLOCK ──
+function startClock() {
+  function tick() {
+    const now = new Date();
+    const h = p2(now.getHours()), m = p2(now.getMinutes()), s = p2(now.getSeconds());
+    const clockEl = document.getElementById('dbClock');
+    const dateEl  = document.getElementById('dbClockDate');
+    if (clockEl) clockEl.textContent = `${h}:${m}:${s}`;
+    if (dateEl)  dateEl.textContent  = now.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  }
+  tick();
+  setInterval(tick, 1000);
+}
+
+// ── JOURNAL ──
+if (!S.journalEntries) S.journalEntries = [];
+let journalMood = '';
+
+function selMood(m, el) {
+  journalMood = m;
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function saveJournalEntry() {
+  const date = document.getElementById('journalDate').value;
+  const text = document.getElementById('journalText').value.trim();
+  if (!date) { toast('Select a date for journal entry','err'); return; }
+  if (!text) { toast('Write something in your journal first','err'); return; }
+  if (!S.journalEntries) S.journalEntries = [];
+  const entry = {
+    id: Date.now().toString(36)+Math.random().toString(36).slice(2,5),
+    date, text, mood: journalMood || '', createdAt: Date.now()
+  };
+  S.journalEntries.unshift(entry);
+  save(); renderJournal(); clearJournalForm();
+  toast('📓 Journal entry saved!','ok');
+}
+
+function clearJournalForm() {
+  document.getElementById('journalText').value = '';
+  document.getElementById('journalDate').value = fd(new Date());
+  journalMood = '';
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+}
+
+function delJournalEntry(id) {
+  S.journalEntries = S.journalEntries.filter(j => j.id !== id);
+  save(); renderJournal();
+  toast('Journal entry deleted','err');
+}
+
+function renderJournal() {
+  if (!S.journalEntries) S.journalEntries = [];
+  const list = document.getElementById('journalList');
+  const countEl = document.getElementById('journalCount');
+  if (!list) return;
+  const sorted = [...S.journalEntries].sort((a,b) => b.createdAt - a.createdAt);
+  if (countEl) countEl.textContent = `— ${sorted.length} entr${sorted.length===1?'y':'ies'}`;
+  if (!sorted.length) {
+    list.innerHTML = '<div class="no-entries"><span class="ni">📓</span>No journal entries yet.<br>Write your first entry above ↑</div>';
+    return;
+  }
+  list.innerHTML = '';
+  sorted.forEach(j => {
+    const el = document.createElement('div'); el.className = 'journal-entry-item';
+    const d = new Date(j.date+'T00:00:00');
+    const dateStr = d.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    el.innerHTML = `
+      <div class="jei-header">
+        <div class="jei-date">${dateStr} ${j.mood ? '<span style="margin-left:0.4rem">'+j.mood+'</span>' : ''}</div>
+        <button class="jei-del" onclick="delJournalEntry('${j.id}')" title="Delete">✕</button>
+      </div>
+      <div class="jei-text">${esc(j.text)}</div>
+    `;
+    list.appendChild(el);
+  });
 }
 
 init();
@@ -1170,7 +1351,7 @@ init();
     currentUID = uid;
 
     S.income = 0; S.incomeMap = {}; S.expenses = []; S.selectedDate = null;
-    S.filter = 'all'; S.cat = null; S.foodItems = [];
+    S.filter = 'all'; S.cat = null; S.foodItems = []; S.journalEntries = [];
     const now = new Date();
     S.calYear = now.getFullYear(); S.calMonth = now.getMonth();
 
@@ -1182,6 +1363,7 @@ init();
         Object.assign(S, meta);
         if (!S.incomeMap) S.incomeMap = {};
         if (!S.foodItems) S.foodItems = [];
+        if (!S.journalEntries) S.journalEntries = [];
       }
 
       const expSnap = await getDocs(expCol(uid));
@@ -1263,7 +1445,7 @@ init();
       currentUID = null;
       if (unsubscribe) { unsubscribe(); unsubscribe = null; }
       S.income = 0; S.incomeMap = {}; S.expenses = []; S.selectedDate = null;
-      S.filter = 'all'; S.cat = null; S.foodItems = [];
+      S.filter = 'all'; S.cat = null; S.foodItems = []; S.journalEntries = [];
       const now = new Date();
       S.calYear = now.getFullYear(); S.calMonth = now.getMonth();
       renderAll();
