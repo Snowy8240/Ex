@@ -245,46 +245,59 @@
   .fg-inp[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.4) sepia(1) saturate(3) hue-rotate(10deg); cursor: pointer; }
   .form-actions { display: flex; gap: 0.7rem; margin-top: 1rem; }
 
-  /* MAIN TABS — glowing all tabs */
-  @keyframes tabGlowOrange { 0%,100%{box-shadow:0 0 8px rgba(249,115,22,0.25),0 0 20px rgba(249,115,22,0.1)} 50%{box-shadow:0 0 16px rgba(249,115,22,0.55),0 0 36px rgba(249,115,22,0.22)} }
-  @keyframes tabGlowGreen  { 0%,100%{box-shadow:0 0 8px rgba(22,163,74,0.25),0 0 20px rgba(22,163,74,0.1)}  50%{box-shadow:0 0 16px rgba(22,163,74,0.55),0 0 36px rgba(22,163,74,0.22)} }
-  @keyframes tabGlowBlue   { 0%,100%{box-shadow:0 0 8px rgba(59,130,246,0.25),0 0 20px rgba(59,130,246,0.1)} 50%{box-shadow:0 0 16px rgba(59,130,246,0.55),0 0 36px rgba(59,130,246,0.22)} }
-  @keyframes tabGlowPurple { 0%,100%{box-shadow:0 0 8px rgba(139,92,246,0.25),0 0 20px rgba(139,92,246,0.1)} 50%{box-shadow:0 0 16px rgba(139,92,246,0.55),0 0 36px rgba(139,92,246,0.22)} }
-  @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+  /* MAIN TABS — GPU-composited glow (opacity only, zero repaint) */
+  @keyframes glowPulse { 0%,100%{opacity:0.35} 50%{opacity:1} }
+  @keyframes fadeIn    { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
 
   .main-tabs {
-    display: flex; gap: 5px; background: var(--bg-raised);
-    border: 1px solid var(--blue-line); border-radius: 18px; padding: 6px;
-    box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+    display:flex; gap:5px; background:var(--bg-raised);
+    border:1px solid var(--blue-line); border-radius:18px; padding:6px;
+    box-shadow:0 2px 12px rgba(0,0,0,0.06);
   }
   .main-tab {
-    flex: 1; padding: 0.6rem 0.4rem; border-radius: 13px; border: 1px solid transparent;
-    font-family: 'Outfit', sans-serif; font-size: 0.74rem;
-    font-weight: 700; cursor: pointer;
-    transition: background 0.22s, border-color 0.22s, transform 0.22s, color 0.22s;
-    display: flex; align-items: center; justify-content: center; gap: 0.28rem;
-    position: relative; white-space: nowrap;
+    flex:1; padding:0.6rem 0.4rem; border-radius:13px; border:1px solid transparent;
+    font-family:'Outfit',sans-serif; font-size:0.74rem; font-weight:700; cursor:pointer;
+    transition:background 0.2s, border-color 0.2s, transform 0.18s, color 0.2s;
+    display:flex; align-items:center; justify-content:center; gap:0.28rem;
+    position:relative; white-space:nowrap; overflow:hidden;
+    will-change:transform;
   }
-  .main-tab[data-tab="add"] { color:#c2410c; background:rgba(249,115,22,0.08); border-color:rgba(249,115,22,0.25); animation:tabGlowOrange 2.8s ease-in-out infinite; }
-  .main-tab[data-tab="add"]:hover:not(.active) { background:rgba(249,115,22,0.15); border-color:rgba(249,115,22,0.45); }
-  .main-tab[data-tab="add"].active { background:linear-gradient(135deg,#f97316,#ea580c); color:#fff; border-color:#ea580c; animation:tabGlowOrange 1.6s ease-in-out infinite; transform:translateY(-1px); }
+  /* Glow layer — pseudo-element, only opacity animates (compositor only) */
+  .main-tab::before {
+    content:''; position:absolute; inset:-2px; border-radius:14px;
+    opacity:0.35; pointer-events:none; z-index:0;
+    animation:glowPulse 2.6s ease-in-out infinite;
+    will-change:opacity;
+  }
+  .main-tab > * { position:relative; z-index:1; }
+  .main-tab[data-tab="add"]::before     { background:radial-gradient(ellipse at 50% 100%,rgba(249,115,22,0.55) 0%,transparent 70%); animation-delay:0s; }
+  .main-tab[data-tab="entries"]::before { background:radial-gradient(ellipse at 50% 100%,rgba(22,163,74,0.55) 0%,transparent 70%);  animation-delay:0.65s; }
+  .main-tab[data-tab="yearly"]::before  { background:radial-gradient(ellipse at 50% 100%,rgba(59,130,246,0.55) 0%,transparent 70%); animation-delay:1.3s; }
+  .main-tab[data-tab="journal"]::before { background:radial-gradient(ellipse at 50% 100%,rgba(139,92,246,0.55) 0%,transparent 70%); animation-delay:1.95s; }
 
-  .main-tab[data-tab="entries"] { color:#15803d; background:rgba(22,163,74,0.08); border-color:rgba(22,163,74,0.25); animation:tabGlowGreen 2.8s ease-in-out infinite 0.5s; }
-  .main-tab[data-tab="entries"]:hover:not(.active) { background:rgba(22,163,74,0.15); border-color:rgba(22,163,74,0.45); }
-  .main-tab[data-tab="entries"].active { background:linear-gradient(135deg,#16a34a,#15803d); color:#fff; border-color:#15803d; animation:tabGlowGreen 1.6s ease-in-out infinite; transform:translateY(-1px); }
+  /* Inactive colours */
+  .main-tab[data-tab="add"]     { color:#c2410c; background:rgba(249,115,22,0.07); border-color:rgba(249,115,22,0.22); }
+  .main-tab[data-tab="entries"] { color:#15803d; background:rgba(22,163,74,0.07);  border-color:rgba(22,163,74,0.22); }
+  .main-tab[data-tab="yearly"]  { color:#1d4ed8; background:rgba(59,130,246,0.07); border-color:rgba(59,130,246,0.22); }
+  .main-tab[data-tab="journal"] { color:#7c3aed; background:rgba(139,92,246,0.07); border-color:rgba(139,92,246,0.22); }
 
-  .main-tab[data-tab="yearly"] { color:#1d4ed8; background:rgba(59,130,246,0.08); border-color:rgba(59,130,246,0.25); animation:tabGlowBlue 2.8s ease-in-out infinite 1s; }
-  .main-tab[data-tab="yearly"]:hover:not(.active) { background:rgba(59,130,246,0.15); border-color:rgba(59,130,246,0.45); }
-  .main-tab[data-tab="yearly"].active { background:linear-gradient(135deg,#3b82f6,#1d4ed8); color:#fff; border-color:#1d4ed8; animation:tabGlowBlue 1.6s ease-in-out infinite; transform:translateY(-1px); }
+  /* Hover */
+  .main-tab[data-tab="add"]:hover:not(.active)     { background:rgba(249,115,22,0.13); border-color:rgba(249,115,22,0.4); }
+  .main-tab[data-tab="entries"]:hover:not(.active) { background:rgba(22,163,74,0.13);  border-color:rgba(22,163,74,0.4); }
+  .main-tab[data-tab="yearly"]:hover:not(.active)  { background:rgba(59,130,246,0.13); border-color:rgba(59,130,246,0.4); }
+  .main-tab[data-tab="journal"]:hover:not(.active) { background:rgba(139,92,246,0.13); border-color:rgba(139,92,246,0.4); }
 
-  .main-tab[data-tab="journal"] { color:#7c3aed; background:rgba(139,92,246,0.08); border-color:rgba(139,92,246,0.25); animation:tabGlowPurple 2.8s ease-in-out infinite 1.5s; }
-  .main-tab[data-tab="journal"]:hover:not(.active) { background:rgba(139,92,246,0.15); border-color:rgba(139,92,246,0.45); }
-  .main-tab[data-tab="journal"].active { background:linear-gradient(135deg,#8b5cf6,#7c3aed); color:#fff; border-color:#7c3aed; animation:tabGlowPurple 1.6s ease-in-out infinite; transform:translateY(-1px); }
+  /* Active — solid gradient, glow layer more visible */
+  .main-tab[data-tab="add"].active     { background:linear-gradient(135deg,#f97316,#ea580c); color:#fff; border-color:#ea580c; transform:translateY(-1px); }
+  .main-tab[data-tab="entries"].active { background:linear-gradient(135deg,#16a34a,#15803d); color:#fff; border-color:#15803d; transform:translateY(-1px); }
+  .main-tab[data-tab="yearly"].active  { background:linear-gradient(135deg,#3b82f6,#1d4ed8); color:#fff; border-color:#1d4ed8; transform:translateY(-1px); }
+  .main-tab[data-tab="journal"].active { background:linear-gradient(135deg,#8b5cf6,#7c3aed); color:#fff; border-color:#7c3aed; transform:translateY(-1px); }
+  .main-tab.active::before { animation-duration:1.8s; }
 
   .main-tab.active .tab-badge { background:rgba(255,255,255,0.28); color:#fff; }
-  .tab-badge { border-radius:20px; font-size:0.58rem; padding:0.08rem 0.4rem; font-weight:700; min-width:18px; text-align:center; transition:all 0.2s; background:rgba(0,0,0,0.12); color:inherit; }
+  .tab-badge { border-radius:20px; font-size:0.58rem; padding:0.08rem 0.4rem; font-weight:700; min-width:18px; text-align:center; transition:all 0.2s; background:rgba(0,0,0,0.1); color:inherit; }
 
-  /* TAB PANELS — same min-height so layout column never jumps between tabs */
+  /* TAB PANELS — uniform min-height so the layout never shifts between tabs */
   .main { display:flex; flex-direction:column; gap:1.2rem; }
   .tab-panel { display:none; flex-direction:column; gap:1.2rem; min-height:600px; }
   .tab-panel.active { display:flex; animation:fadeIn 0.22s ease; }
@@ -1219,18 +1232,26 @@ function toast(msg,type='ok'){
   wrap.appendChild(t); setTimeout(()=>t.remove(),3200);
 }
 
-// ── REAL-TIME CLOCK ──
+// ── REAL-TIME CLOCK ── (uses textContent only — no layout reflow)
 function startClock() {
+  const clockEl = document.getElementById('dbClock');
+  const dateEl  = document.getElementById('dbClockDate');
+  let lastSec = -1;
   function tick() {
     const now = new Date();
-    const h = p2(now.getHours()), m = p2(now.getMinutes()), s = p2(now.getSeconds());
-    const clockEl = document.getElementById('dbClock');
-    const dateEl  = document.getElementById('dbClockDate');
-    if (clockEl) clockEl.textContent = `${h}:${m}:${s}`;
-    if (dateEl)  dateEl.textContent  = now.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+    const s = now.getSeconds();
+    if (s === lastSec) return; // skip if second hasn't changed
+    lastSec = s;
+    const h = p2(now.getHours()), m = p2(now.getMinutes());
+    if (clockEl) clockEl.textContent = `${h}:${m}:${p2(s)}`;
+    if (dateEl && s === 0) { // only update date display once per minute
+      dateEl.textContent = now.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+    }
   }
+  // Set date immediately on load
+  if (dateEl) dateEl.textContent = new Date().toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
   tick();
-  setInterval(tick, 1000);
+  setInterval(tick, 500); // poll at 500ms so we never miss a second boundary
 }
 
 // ── JOURNAL ──
